@@ -15,6 +15,7 @@ app.use(express.static("public"));
 app.use(cors());
 
 // routes
+app.use("/api/auth", require("./app/routes/auth.routes.js"));
 
 app.listen(PORT, () => {
     console.log(`Server running on port : ${PORT}`);
