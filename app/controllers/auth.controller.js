@@ -4,38 +4,6 @@ const jwt = require('jsonwebtoken');
 const { ErrorResponseException, createErrorDetail } = require('../helpers/errors/error_response');
 const dataValidator = require('../helpers/validator');
 
-// const test = async (req, res) => {
-//     try {
-//         const abc = await User.query();
-//         if (abc.length == 0){
-//             throw new ErrorResponseException(404, "message", "errors", "type");
-//         }
-
-//         return res.json({
-//             status : 200, 
-//             message : "wkkw", 
-//             data : abc
-//         })
-
-        
-//     } catch (err){
-//         if (err instanceof ErrorResponseException){
-//             return res.status(err.status).send({
-//                 status: err.status,
-//                 ...(err.type !== null && { type : err.type }),
-//                 message: err.message,
-//                 ...(err.errors !== null && { errors : err.errors}),
-//               });
-//         }
-//         console.error(err);
-//         return res.status(500).send({
-//           code: 500,
-//           message: "Internal server error."
-//         });
-//     }
-// };
-
-
 const login = async (req, res) => {
     try {
 
@@ -77,7 +45,7 @@ const login = async (req, res) => {
         }
         console.error(err);
         return res.status(500).send({
-          code: 500,
+          status: 500,
           message: "Internal server error."
         });
     }
@@ -118,7 +86,7 @@ const register = async (req, res) => {
         await User.query().insert({name, email, password : hashedPassword});
 
         return res.status(201).send({
-            code: 201,
+            status: 201,
             message: "Registration successful.",
         });
 
@@ -134,7 +102,7 @@ const register = async (req, res) => {
         }
         console.error(err);
         return res.status(500).send({
-          code: 500,
+          status: 500,
           message: "Internal server error."
         });
     }

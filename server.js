@@ -17,6 +17,11 @@ app.use(cors());
 // routes
 app.use("/api/auth", require("./app/routes/auth.routes.js"));
 
+// teacher routes
+app.use("/api/teacher", require("./app/routes/teacher/class.routes.js"));
+
+// student routes
+
 app.listen(PORT, () => {
     console.log(`Server running on port : ${PORT}`);
 });
