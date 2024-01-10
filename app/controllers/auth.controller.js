@@ -1,7 +1,8 @@
 const User = require('../models/user')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
-const { ErrorResponseException } = require('../helpers/errors/error_response');
+const { ErrorResponseException, createErrorDetail } = require('../helpers/errors/error_response');
+const dataValidator = require('../helpers/validator');
 
 // const test = async (req, res) => {
 //     try {
@@ -82,7 +83,65 @@ const login = async (req, res) => {
     }
 }
 
+const register = async (req, res) => {
+    try {
+
+        const { 
+            email,
+            name,
+            password, 
+         } = req.body;
+
+         const validationInfoList = [];
+
+        if (!dataValidator.stringIsNotEmpty(name))
+        {
+            validationInfoList.push(createErrorDetail("NAME_EMPTY", "Name must not be empty."));      
+        }
+
+        if (!dataValidator.isValidEmail(email))
+        {
+            validationInfoList.push(createErrorDetail("EMAIL_INVALID", "Invalid email address."));      
+        }
+
+        if (!dataValidator.isSecurePassword(password))
+        {
+            validationInfoList.push(createErrorDetail("PASSWORD_INVALID", "Password must be at least 8 characters long."));      
+        }
+  
+        if (validationInfoList.length > 0) {
+            throw new ErrorResponseException(400, "Invalid data.", validationInfoList, null);
+        }      
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        await User.query().insert({name, email, password : hashedPassword});
+
+        return res.status(201).send({
+            code: 201,
+            message: "Registration successful.",
+        });
+
+
+    } catch (err){
+        if (err instanceof ErrorResponseException){
+            return res.status(err.status).send({
+                status: err.status,
+                ...(err.type !== null && { type : err.type }),
+                message: err.message,
+                ...(err.errors !== null && { errors : err.errors}),
+              });
+        }
+        console.error(err);
+        return res.status(500).send({
+          code: 500,
+          message: "Internal server error."
+        });
+    }
+}
+
 
 module.exports = {
-    login
+    login,
+    register
 }
