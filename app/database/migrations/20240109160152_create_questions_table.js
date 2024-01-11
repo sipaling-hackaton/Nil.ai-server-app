@@ -6,7 +6,7 @@ exports.up = function(knex) {
     return knex.schema.createTable('questions', function (table) {
         table.string('id').primary();
         table.string('question').notNullable();   
-        table.string('assignment_id').references('id').inTable('assignments');        
+        table.string('assignment_id').references('id').inTable('assignments').onDelete('CASCADE');        
         table.timestamps(true, true);
       });  
 };

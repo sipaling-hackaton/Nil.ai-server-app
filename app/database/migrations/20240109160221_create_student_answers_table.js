@@ -6,8 +6,8 @@ exports.up = function(knex) {
     return knex.schema.createTable('student_answers', function (table) {
         table.string('id').primary();
         table.string('answer').nullable();
-        table.string('question_id').references('id').inTable('questions');        
-        table.string('rubric_id').references('id').inTable('question_rubrics');        
+        table.string('question_id').references('id').inTable('questions').onDelete('CASCADE');        
+        table.string('rubric_id').references('id').inTable('question_rubrics').onDelete('SET NULL');        
         table.timestamps(true, true);
       });  
 };

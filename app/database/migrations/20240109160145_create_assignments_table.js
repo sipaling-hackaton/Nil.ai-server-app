@@ -8,7 +8,7 @@ exports.up = function(knex) {
         table.string('code').notNullable();
         table.string('title').notNullable();
         table.string('description').nullable();        
-        table.string('class_id').references('id').inTable('classes');        
+        table.string('class_id').references('id').inTable('classes').onDelete('CASCADE');        
         table.timestamp('open_sub_time').nullable();
         table.timestamp('close_sub_time').nullable();
         table.timestamps(true, true);

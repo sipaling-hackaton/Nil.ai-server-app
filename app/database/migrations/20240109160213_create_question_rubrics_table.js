@@ -7,7 +7,7 @@ exports.up = function(knex) {
         table.string('id').primary();
         table.string('description').notNullable();
         table.integer('point').notNullable();
-        table.string('question_id').references('id').inTable('questions');        
+        table.string('question_id').references('id').inTable('questions').onDelete('CASCADE');        
         table.timestamps(true, true);
       });  
 };

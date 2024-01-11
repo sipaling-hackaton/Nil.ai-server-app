@@ -8,7 +8,7 @@ exports.up = function(knex) {
         table.string('code').notNullable();
         table.string('title').notNullable();
         table.string('description').nullable();        
-        table.string('teacher_id').references('id').inTable('users');        
+        table.string('teacher_id').references('id').inTable('users').onDelete('CASCADE');
         table.timestamps(true, true);
       });  
 };
