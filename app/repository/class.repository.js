@@ -1,4 +1,4 @@
-const Class = require('../models/class')
+const Class = require("../models/class")
 const { v4: uuid } = require("uuid");
 
 class ClassRepository {
@@ -57,7 +57,7 @@ class ClassRepository {
                 .where('id', user.id);
             })
             .delete();
-            
+
         return success;
     }
 
