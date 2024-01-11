@@ -1,8 +1,10 @@
 const User = require('../models/user')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken');
+const { v4: uuid } = require("uuid");
 const { ErrorResponseException, createErrorDetail } = require('../helpers/errors/error_response');
 const dataValidator = require('../helpers/validator');
+const { ConstraintViolationError } = require('objection');
 
 const login = async (req, res) => {
     try {
@@ -83,15 +85,19 @@ const register = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        await User.query().insert({name, email, password : hashedPassword});
+        await User.query().insert({id : uuid(), name, email, password : hashedPassword});
 
         return res.status(201).send({
             status: 201,
             message: "Registration successful.",
         });
-
-
     } catch (err){
+        if (err instanceof ConstraintViolationError){
+            return res.status(409).send({
+                status: 409,
+                message: "Email is registered."
+              });
+        }
         if (err instanceof ErrorResponseException){
             return res.status(err.status).send({
                 status: err.status,
