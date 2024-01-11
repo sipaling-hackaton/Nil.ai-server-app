@@ -55,9 +55,9 @@ const register = async (req, res) => {
     try {
 
         const { 
-            email,
-            name,
-            password, 
+            email = "",
+            name = "",
+            password = "", 
          } = req.body;
 
          const validationInfoList = [];
