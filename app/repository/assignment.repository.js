@@ -54,7 +54,35 @@ class AssignmentRepository {
     }
 
     static async updateAssignment(user, id, data){
+        const {
+            code = "",
+            title, 
+            description,
+            open_sub_time, 
+            close_sub_time, 
+            questions,
+            rubrics
+        } = data;
 
+        const success = await Assignment.query()
+            .join('classes', 'classes.id', '=', 'assignments.class_id')
+            .join('users', 'users.id', '=', 'classes.teacher_id')
+            .where({'assignments.id' : id, 'users.id' : user.id})
+            .update({title, description, open_sub_time, close_sub_time});
+        
+        if (!success) return null;
+
+        // edit questions and rubrics
+        Model.transaction(async (trx) => {
+            await Question.query()
+                .where({'assignment_id' : id})
+                .delete();
+            
+            await Question.query().insert(questions);
+            await QuestionRubric.query().insert(rubrics);
+        });
+
+        return true;
     }
 
     static async deleteAssignment(user, id){
