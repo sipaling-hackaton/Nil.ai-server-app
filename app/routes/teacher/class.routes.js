@@ -7,7 +7,11 @@ const ClassController = require('../../controllers/teacher/class.controller');
 router.use(middlewares.authenticated);
 
 // TEST ROUTE
-router.get('/', ClassController.test);
+router.get('/', ClassController.getAllClasses);
+router.get('/:id', ClassController.getClassByID);
+router.post('/', ClassController.createNewClass);
+router.put('/', ClassController.updateClass);
+router.delete('/', ClassController.deleteClass);
 
 
 module.exports = router;
