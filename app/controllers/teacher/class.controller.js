@@ -163,7 +163,36 @@ const updateClass = async (req, res) => {
 }
 
 const deleteClass = async (req, res) => {
+    try {
 
+        const {id} = req.params;
+                
+        const success = await ClassRepository.deleteClass(req.user, id);
+        
+        if (!success){
+            throw new ErrorResponseException(404, "Class not found.");
+        }
+
+        return res.status(200).send({
+            status: 200,
+            message: "Class deleted successfully.",
+        });        
+
+    } catch (err){
+        if (err instanceof ErrorResponseException){
+            return res.status(err.status).send({
+                status: err.status,
+                ...(err.type !== null && { type : err.type }),
+                message: err.message,
+                ...(err.errors !== null && { errors : err.errors}),
+              });
+        }
+        console.error(err);
+        return res.status(500).send({
+          status: 500,
+          message: "Internal server error."
+        });
+    }
 }
 
 module.exports = {

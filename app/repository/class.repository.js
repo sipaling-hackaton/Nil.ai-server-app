@@ -49,7 +49,7 @@ class ClassRepository {
 
     static async deleteClass(user, id)
     {
-        await Class.query()
+        const success = await Class.query()
             .where({ id })
             .whereIn('teacher_id', function() {
             this.select('id')
@@ -57,6 +57,8 @@ class ClassRepository {
                 .where('id', user.id);
             })
             .delete();
+            
+        return success;
     }
 
 }
