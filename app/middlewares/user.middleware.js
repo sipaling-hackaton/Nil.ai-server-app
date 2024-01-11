@@ -10,7 +10,7 @@ const authenticated = async (req, res, next) => {
           process.env.JWT_SECRET
         );
 
-        req.data.user = user;
+        req.user = user;
         const { id }= user;
 
         const userData = await User.query().where({ id }).first();
