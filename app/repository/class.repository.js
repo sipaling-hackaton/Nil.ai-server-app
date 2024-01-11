@@ -32,7 +32,7 @@ class ClassRepository {
     {
         const {title, description} = data;
 
-        await Class.query()
+        const success = await Class.query()
             .where({ id })
             .whereIn('teacher_id', function() {
             this.select('id')
@@ -43,6 +43,8 @@ class ClassRepository {
                 title, 
                 description
             });
+
+        return success;
     }
 
     static async deleteClass(user, id)

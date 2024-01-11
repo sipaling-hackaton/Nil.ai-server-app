@@ -87,10 +87,7 @@ const getClassByID = async (req, res) => {
         const data = await ClassRepository.getClassByID(req.user, id)
 
         if (!data){
-            return res.status(404).send({
-                status: 404,
-                message: "Class data not found.",           
-            });
+            throw new ErrorResponseException(404, "Class not found.");
         }
 
         return res.status(200).send({
@@ -118,7 +115,51 @@ const getClassByID = async (req, res) => {
 }
 
 const updateClass = async (req, res) => {
+    try {
 
+        const {id} = req.params;
+        const {title = "", description = ""} = req.body; 
+        
+        const validationInfoList = []; 
+
+        if (!dataValidator.stringIsNotEmpty(title))
+        {
+            validationInfoList.push(createErrorDetail("TITLE_EMPTY", "Class title must not be empty."));      
+        }
+
+        if (validationInfoList.length > 0) {
+            throw new ErrorResponseException(400, "Invalid data.", validationInfoList, null);
+        }   
+        
+        const success = await ClassRepository.updateClassData(req.user, id, {
+            title,
+            description,
+        })
+
+        if (!success){
+            throw new ErrorResponseException(404, "Class not found.");
+        }
+
+        return res.status(200).send({
+            status: 200,
+            message: "Class updated successfully.",
+        });        
+
+    } catch (err){
+        if (err instanceof ErrorResponseException){
+            return res.status(err.status).send({
+                status: err.status,
+                ...(err.type !== null && { type : err.type }),
+                message: err.message,
+                ...(err.errors !== null && { errors : err.errors}),
+              });
+        }
+        console.error(err);
+        return res.status(500).send({
+          status: 500,
+          message: "Internal server error."
+        });
+    }
 }
 
 const deleteClass = async (req, res) => {

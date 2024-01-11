@@ -10,8 +10,8 @@ router.use(middlewares.authenticated);
 router.get('/', ClassController.getAllClasses);
 router.get('/:id', ClassController.getClassByID);
 router.post('/', ClassController.createNewClass);
-router.put('/', ClassController.updateClass);
-router.delete('/', ClassController.deleteClass);
+router.put('/:id', ClassController.updateClass);
+router.delete('/:id', ClassController.deleteClass);
 
 
 module.exports = router;
