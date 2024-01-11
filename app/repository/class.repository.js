@@ -12,21 +12,19 @@ class ClassRepository {
     static async getClasses(user)
     {
         const data = await Class.query()
-            .join('users', 'user.id', '=', 'classes.teacher_id')
-            .where('teacher_id', user.id)
-            .first();
+            .join('users', 'users.id', '=', 'classes.teacher_id')
+            .where({'teacher_id' : user.id})
         
         return data;
     }
 
-    static async getClassByID(user, id)
+    static async getClassByID(user, id = "")
     {
         const data = await Class.query()
-            .join('users', 'user.id', '=', 'classes.teacher_id')
-            .where('teacher_id', user.id)
-            .where({id})
+            .join('users', 'users.id', '=', 'classes.teacher_id')
+            .where({'classes.id' : id, 'teacher_id' : user.id})
             .first();
-        
+
         return data;
     }
 

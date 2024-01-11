@@ -51,11 +51,70 @@ const createNewClass = async (req, res) => {
 }
 
 const getAllClasses = async (req, res) => {
+    try {
 
+        const data = await ClassRepository.getClasses(req.user);
+
+        return res.status(200).send({
+            status: 200,
+            message: "Successfully fetched all classes.",
+            data
+        });             
+        
+
+    } catch (err){
+        if (err instanceof ErrorResponseException){
+            return res.status(err.status).send({
+                status: err.status,
+                ...(err.type !== null && { type : err.type }),
+                message: err.message,
+                ...(err.errors !== null && { errors : err.errors}),
+              });
+        }
+        console.error(err);
+        return res.status(500).send({
+          status: 500,
+          message: "Internal server error."
+        });
+    }
 }
 
 const getClassByID = async (req, res) => {
+    try {
 
+        const { id } = req.params;
+
+        const data = await ClassRepository.getClassByID(req.user, id)
+
+        if (!data){
+            return res.status(404).send({
+                status: 404,
+                message: "Class data not found.",           
+            });
+        }
+
+        return res.status(200).send({
+            status: 200,
+            message: "Successfully fetched class data.",
+            data
+        });             
+        
+
+    } catch (err){
+        if (err instanceof ErrorResponseException){
+            return res.status(err.status).send({
+                status: err.status,
+                ...(err.type !== null && { type : err.type }),
+                message: err.message,
+                ...(err.errors !== null && { errors : err.errors}),
+              });
+        }
+        console.error(err);
+        return res.status(500).send({
+          status: 500,
+          message: "Internal server error."
+        });
+    }
 }
 
 const updateClass = async (req, res) => {
