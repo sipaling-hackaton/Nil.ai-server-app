@@ -18,7 +18,8 @@ app.use(cors());
 app.use("/api/auth", require("./app/routes/auth.routes.js"));
 
 // teacher routes
-app.use("/api/teacher", require("./app/routes/teacher/class.routes.js"));
+app.use("/api/teacher/class", require("./app/routes/teacher/class.routes.js"));
+app.use("/api/teacher/assignment", require('./app/routes/teacher/assignment.routes.js'));
 
 // student routes
 

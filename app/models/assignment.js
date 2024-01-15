@@ -1,5 +1,8 @@
 const { Model } = require('objection')
 const knex = require("../database/knex") 
+const Class = require('./class');
+const Question = require('./questions');
+
 
 Model.knex(knex)
 

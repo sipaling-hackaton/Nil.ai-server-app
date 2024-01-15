@@ -1,6 +1,7 @@
 const { Model } = require('objection');
 const knex = require('../database/knex');
-const QuestionRubric = require('./QuestionRubric');
+const QuestionRubric = require('./question_rubric');
+const Assignment = require('./assignment');
 
 Model.knex(knex);
 

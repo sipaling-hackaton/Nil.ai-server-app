@@ -2,31 +2,55 @@ const Assignment = require('../models/assignment')
 const Question = require('../models/questions')
 const QuestionRubric = require('../models/question_rubric');
 const { Model } = require("objection");
+const { ForeignKeyViolationError } = require("../helpers/errors/custom_exception");
 const { v4: uuid } = require("uuid");
+const knex = require('../database/knex');
 
 class AssignmentRepository {
-    static async createAssignment(data){
+
+    static async createAssignment(data) {
         const {
-            id, 
+            id,
             code = "",
-            title, 
+            title,
             description,
-            class_id, 
-            open_sub_time, 
-            close_sub_time, 
+            class_id,
+            open_sub_time,
+            close_sub_time,
             questions,
             rubrics
         } = data;
-
-        Model.transaction(async (trx) => {
-            await Assignment.query().insert({
-                id, code, title, description, class_id, open_sub_time, close_sub_time
-            });
-            await Question.query().insert(questions);
-            await QuestionRubric.query().insert(rubrics);
-        })
-
+    
+        return new Promise(async (resolve, reject) => {
+            try {
+                await Model.transaction(async (trx) => {
+                    await Assignment.query().insert({
+                        id, code, title, description, class_id, open_sub_time, close_sub_time
+                    });
+                    if (questions.length > 0) {
+                        const insertQuery = Question.query().insert(questions);
+                        await knex('questions').insert(questions);                        
+                    }
+                    if (rubrics.length > 0) {
+                        const insertQuery = QuestionRubric.query().insert(rubrics);
+                        await knex('question_rubrics').insert(rubrics);                       
+                    }
+                    resolve(true);
+                }).catch(err => {
+                    reject(err);
+                });
+            } catch (err) {
+                reject(err);
+            }
+        }).then((result) => {
+            return true;
+        }).catch((err) => {
+            console.log(err)
+            return false;
+        });
     }
+    
+
 
     static async getAssignments(user, class_id){
         const data = await Assignment.query()
@@ -53,37 +77,52 @@ class AssignmentRepository {
         return { assignment, questions }
     }
 
-    static async updateAssignment(user, id, data){
+    static async updateAssignment(user, id, data) {
         const {
             code = "",
-            title, 
+            title,
             description,
-            open_sub_time, 
-            close_sub_time, 
+            open_sub_time,
+            close_sub_time,
             questions,
             rubrics
         } = data;
-
-        const success = await Assignment.query()
-            .join('classes', 'classes.id', '=', 'assignments.class_id')
-            .join('users', 'users.id', '=', 'classes.teacher_id')
-            .where({'assignments.id' : id, 'users.id' : user.id})
-            .update({title, description, open_sub_time, close_sub_time});
-        
-        if (!success) return null;
-
-        // edit questions and rubrics
-        Model.transaction(async (trx) => {
-            await Question.query()
-                .where({'assignment_id' : id})
-                .delete();
+    
+        try {
+            const success = await Assignment.query()
+                .join('classes', 'classes.id', '=', 'assignments.class_id')
+                .join('users', 'users.id', '=', 'classes.teacher_id')
+                .where({'assignments.id': id, 'users.id': user.id})
+                .update({title, description, open_sub_time, close_sub_time});
+    
+            if (!success) return null;
+    
+            // edit questions and rubrics
+            await new Promise(async (resolve, reject) => {
+                try {
+                    await Model.transaction(async (trx) => {
+                        await Question.query()
+                            .where({'assignment_id': id})
+                            .delete();
+    
+                        await Question.query().insert(questions);
+                        await QuestionRubric.query().insert(rubrics);
+                        resolve(true);
+                    }).catch(err => {
+                        reject(err);
+                    });
+                } catch (err) {
+                    reject(err);
+                }
+            });
             
-            await Question.query().insert(questions);
-            await QuestionRubric.query().insert(rubrics);
-        });
-
-        return true;
+            return true;
+        } catch (err) {
+            console.error(err);
+            return false;
+        }
     }
+    
 
     static async deleteAssignment(user, id){
 
