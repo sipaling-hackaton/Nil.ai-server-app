@@ -310,6 +310,21 @@ const updateAssignmentData = async (req, res) => {
 
 const deleteAssignment = async (req, res) => {
     try {
+
+        const {id} = req.params        
+
+        const success = await AssignmentRepository.deleteAssignment(req.user, id);
+
+        if (!success) {
+            throw new ErrorResponseException(404, "Assignment is not found.");
+        }
+
+        return res.status(200).send({
+            status: 200,
+            message: "Assignment deleted successfully.",
+        });          
+
+
         
     } catch (err){
         if (err instanceof ErrorResponseException){

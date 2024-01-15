@@ -9,6 +9,7 @@ router.get('/class/:id', AssignmentController.getAllAssignments);
 router.get('/:id', AssignmentController.getSpecificAssignment);
 router.post('/', AssignmentController.createNewAssignment);
 router.put('/:id', AssignmentController.updateAssignmentData);
+router.delete('/:id', AssignmentController.deleteAssignment);
 
 
 module.exports = router;
