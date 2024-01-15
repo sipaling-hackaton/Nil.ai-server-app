@@ -67,14 +67,16 @@ class AssignmentRepository {
             .join('classes', 'classes.id', '=', 'assignments.class_id')
             .join('users', 'users.id', '=', 'classes.teacher_id')
             .where({'assignments.id' : id, 'users.id' : user.id})
-            .first();
+            .first(); 
+    
+        if (!assignment) return null;
 
         const questions = await Question.query()
             .withGraphFetched('rubrics')
             .join('assignments', 'assignments.id','=','questions.assignment_id')
             .where({'assignments.id' : id});
 
-        return { assignment, questions }
+        return { ...assignment, questions}
     }
 
     static async updateAssignment(user, id, data) {

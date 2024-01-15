@@ -158,6 +158,23 @@ const getAllAssignments = async (req, res) => {
 
 const getSpecificAssignment = async (req, res) => {
     try {
+
+        const {id} = req.params;
+        
+        const data =  await AssignmentRepository.getAssignmentsByID(req.user, id);
+
+        if (!data){
+            return res.status(404).send({
+                status : 404, 
+                message : "Assignment not found."
+            })
+        }
+
+        return res.status(200).send({
+            status: 200,
+            message: "Successfully fetched assignment's data.",
+            data
+        });          
         
     } catch (err){
         if (err instanceof ErrorResponseException){

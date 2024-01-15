@@ -6,6 +6,7 @@ const AssignmentController = require('../../controllers/teacher/assignment.contr
 router.use(middlewares.authenticated);
 
 router.get('/class/:id', AssignmentController.getAllAssignments);
+router.get('/:id', AssignmentController.getSpecificAssignment);
 router.post('/', AssignmentController.createNewAssignment);
 
 module.exports = router;
