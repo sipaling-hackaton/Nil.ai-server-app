@@ -127,6 +127,17 @@ const createNewAssignment = async (req, res) => {
 
 const getAllAssignments = async (req, res) => {
     try {
+
+        const {id} = req.params;
+        
+        const data =  await AssignmentRepository.getAssignments(req.user, id);
+
+        return res.status(200).send({
+            status: 200,
+            message: "Successfully fetched all class's assignments.",
+            data
+        });            
+
         
     } catch (err){
         if (err instanceof ErrorResponseException){
