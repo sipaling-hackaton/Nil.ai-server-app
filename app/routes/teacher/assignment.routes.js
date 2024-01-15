@@ -8,5 +8,7 @@ router.use(middlewares.authenticated);
 router.get('/class/:id', AssignmentController.getAllAssignments);
 router.get('/:id', AssignmentController.getSpecificAssignment);
 router.post('/', AssignmentController.createNewAssignment);
+router.put('/:id', AssignmentController.updateAssignmentData);
+
 
 module.exports = router;

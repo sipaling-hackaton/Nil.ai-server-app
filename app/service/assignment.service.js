@@ -1,9 +1,9 @@
 const dataValidator = require('../helpers/validator');
 const utils = require('../helpers/utils');
 
-const validateQuestions = (questions) => {
+const validateQuestions = (questions, assignment_id) => {
 
-        const assignmentID = utils.generateRandomId(10);
+        const assignmentID = assignment_id || utils.generateRandomId(10);
 
         let rubrics = [];    
 

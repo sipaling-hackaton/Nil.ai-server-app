@@ -28,11 +28,9 @@ class AssignmentRepository {
                         id, code, title, description, class_id, open_sub_time, close_sub_time
                     });
                     if (questions.length > 0) {
-                        const insertQuery = Question.query().insert(questions);
                         await knex('questions').insert(questions);                        
                     }
                     if (rubrics.length > 0) {
-                        const insertQuery = QuestionRubric.query().insert(rubrics);
                         await knex('question_rubrics').insert(rubrics);                       
                     }
                     resolve(true);
@@ -86,43 +84,52 @@ class AssignmentRepository {
             description,
             open_sub_time,
             close_sub_time,
-            questions,
-            rubrics
+            questions = [],
+            rubrics = []
         } = data;
     
-        try {
-            const success = await Assignment.query()
-                .join('classes', 'classes.id', '=', 'assignments.class_id')
-                .join('users', 'users.id', '=', 'classes.teacher_id')
-                .where({'assignments.id': id, 'users.id': user.id})
-                .update({title, description, open_sub_time, close_sub_time});
-    
-            if (!success) return null;
-    
-            // edit questions and rubrics
-            await new Promise(async (resolve, reject) => {
-                try {
-                    await Model.transaction(async (trx) => {
-                        await Question.query()
-                            .where({'assignment_id': id})
-                            .delete();
-    
-                        await Question.query().insert(questions);
-                        await QuestionRubric.query().insert(rubrics);
-                        resolve(true);
-                    }).catch(err => {
-                        reject(err);
-                    });
-                } catch (err) {
-                    reject(err);
-                }
+        const success = await Assignment.query()
+            .join('classes', 'classes.id', '=', 'assignments.class_id')
+            .join('users', 'users.id', '=', 'classes.teacher_id')
+            .where({'assignments.id': id, 'users.id': user.id})
+            .update({
+                'assignments.title': title,
+                'assignments.description': description,
+                'assignments.open_sub_time': open_sub_time,
+                'assignments.close_sub_time': close_sub_time
             });
-            
+
+        if (!success) return null;
+
+        // edit questions and rubrics
+        return new Promise(async (resolve, reject) => {
+            try {
+                await Model.transaction(async (trx) => {
+                    await Question.query()
+                        .where({'assignment_id': id})
+                        .delete();
+
+                    if (questions.length > 0) {
+                        await knex('questions').insert(questions);                        
+                    }
+                    if (rubrics.length > 0) {
+                        await knex('question_rubrics').insert(rubrics);                       
+                    }
+                    resolve(true);
+                }).catch(err => {
+                    reject(err);
+                });
+            } catch (err) {
+                reject(err);
+            }
+        }).then((result) => {
             return true;
-        } catch (err) {
-            console.error(err);
+        }).catch((err) => {
+            console.log(err)
             return false;
-        }
+        });
+            
+
     }
     
 

@@ -195,8 +195,102 @@ const getSpecificAssignment = async (req, res) => {
 
 const updateAssignmentData = async (req, res) => {
     try {
+
+        const {id} = req.params
+
+        const {
+            title = "",
+            description, 
+            open_sub_time = "", 
+            close_sub_time = "",
+            questions = [], // rubrics is embedded on the question
+        } = req.body;
+
+        const validationInfoList = []; 
+
+        if (!dataValidator.stringIsNotEmpty(title))
+        {
+            validationInfoList.push(createErrorDetail("TITLE_EMPTY", "Class title must not be empty."));      
+        }  
+
+        if (!dataValidator.isValidDateTime(open_sub_time))
+        {
+            validationInfoList.push(createErrorDetail("OPEN_TIME_INVALID", "Assignment open time is not valid."));      
+        } 
         
+        if (!dataValidator.isValidDateTime(close_sub_time))
+        {
+            validationInfoList.push(createErrorDetail("CLOSE_TIME_INVALID", "Assignment close time is not valid."));      
+        }         
+        
+        if (validationInfoList.length > 0) {
+            throw new ErrorResponseException(400, "Invalid data.", validationInfoList, null);
+        }   
+
+        // separate questions and rubrics
+        
+        // FROM format : 
+        /*
+            questions : [
+                {
+                    id : *x* (defined in backend)
+                    assignment_id : *y* (defined in backend)
+                    question : <String>
+                    rubric : [
+                        {
+                            id : *z* (defined in backend)
+                            question_id : *x*   (defined in backend)
+                            description : <String>
+                            point : <Integer>
+                        }
+                    ]
+                }
+            ]
+        */
+        
+        // TO format : questions <Array>, rubric <Array>
+
+        const { 
+            error = null, 
+            questions : processedQuestions, 
+            rubrics, 
+            assignment_id
+        } = validateQuestions(questions, id);
+
+        if (error){
+            throw new ErrorResponseException(422, error)
+        }
+
+        const success = await AssignmentRepository.updateAssignment(
+            req.user,
+            id,
+            {
+                title,
+                description,
+                open_sub_time,
+                close_sub_time,
+                questions : processedQuestions,
+                rubrics
+            }
+        )
+        
+        if (!success) {
+            throw new ForeignKeyViolationError("Assignment is not found.");
+        }
+
+        return res.status(200).send({
+            status: 200,
+            message: "Assignment updated successfully.",
+        });  
+            
     } catch (err){
+        if (err instanceof ForeignKeyViolationError) {
+            return res.status(404).send({
+                status: 404,
+                message: "Assignment is not found."
+              });            
+        }
+
         if (err instanceof ErrorResponseException){
             return res.status(err.status).send({
                 status: err.status,
@@ -205,6 +299,7 @@ const updateAssignmentData = async (req, res) => {
                 ...(err.errors !== null && { errors : err.errors}),
               });
         }
+
         console.error(err);
         return res.status(500).send({
           status: 500,
